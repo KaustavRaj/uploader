@@ -1,45 +1,51 @@
-const candidateModal = require("../models/candidate");
+const async = require("async");
+const { candidateModal } = require("../models");
 
-function transformRow(keys, values) {
-  let newRow = {};
-  keys.forEach((key, index) => (newRow[key] = values[index]));
-  return newRow;
-}
+const verifyDetails = (row, callback) => {
+  // name & email required, otherwise won't insert;
+  // returns callback with params (error, canBeInserted)
 
-function verifyDetails(row, onSuccess, onError) {
-  // name & email required
   if (!row["Name of the Candidate"] || !row["Email"]) {
-    return onSuccess(false);
+    console.log("Name/email not found...");
+    process.nextTick(() => callback(null, false));
+  } else {
+    candidateModal.exists({ Email: row["Email"] }, (error, exists) => {
+      if (error) {
+        return callback(error);
+      } else {
+        return callback(null, !exists);
+      }
+    });
   }
+};
 
-  // duplicate email check
-  candidateModal.find({ Email: row["Email"] }, (error, candidate) => {
-    if (error) onError(error);
-    return onSuccess(candidate == null);
-  });
-}
-
-function uploadSingleRow(row, onError) {
-  const onSuccess = (canBeInserted) => {
-    if (canBeInserted) {
+const writeSingleRow = (row, callback) => {
+  verifyDetails(row, (error, canBeInserted) => {
+    if (error) {
+      callback(error);
+    } else if (canBeInserted) {
       candidateModal.create(row, (error) => {
-        if (error) onError(error);
+        callback(error);
       });
+    } else {
+      console.log("Found a duplicate entry");
+      process.nextTick(callback);
     }
-  };
+  });
+};
 
-  verifyDetails(row, onSuccess, onError);
-}
+const writeDatabase = async (req, res, next) => {
+  let data = res.locals.jsonFile;
+  console.log("Total entries to insert :", data.length);
 
-function uploadCandidates(req, res) {
-  const [header, body] = res.locals.jsonFile;
-  body.forEach((row) =>
-    uploadSingleRow(transformRow(header, row), (error) => {
+  async.eachSeries(data, writeSingleRow, (error) => {
+    console.log("Inserting entries complete !");
+    if (error) {
       console.error(error);
-      return res.status(500);
-    })
-  );
-  // HERE RETURN SUCCESS MESSAGE IF FINISHED
-}
+      return res.sendStatus(500);
+    }
+    return res.sendStatus(200);
+  });
+};
 
-module.exports = uploadCandidates;
+module.exports = { writeDatabase };

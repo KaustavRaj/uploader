@@ -35,10 +35,24 @@ body {
   @apply bg-green-600 w-32 py-2 rounded-xl text-white mt-3 hover:bg-green-800;
 }
 
+/* Header section */
+
+.app-header {
+  @apply w-full p-2 bg-header flex justify-between;
+}
+
 /* App file */
 
+.app-main {
+  @apply w-screen h-screen p-5;
+}
+
 .app-wrapper {
-  @apply w-screen h-screen py-10 px-20;
+  @apply w-full h-full border-2 shadow-sm;
+}
+
+.app-content {
+  @apply w-full py-10 px-2 md:px-20;
 }
 
 .upload-container {

@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { UploadIcon } from "@heroicons/react/solid";
+import { UploadIcon, XIcon } from "@heroicons/react/solid";
 import { CheckIcon } from "@heroicons/react/outline";
 import axios from "axios";
 
@@ -23,6 +23,7 @@ function App() {
   const handleUpload = (event) => {
     let uploadedFile = event.target.files[0];
     console.log("FILE", uploadedFile);
+
     validateFileType(
       uploadedFile,
       (file) => {
@@ -46,14 +47,20 @@ function App() {
       .post(uploadUrl, formData)
       .then(
         (response) => {
-          console.log("RESPONSE => ", response);
           setSubmitted(true);
           setFile(null);
         },
-        (error) => submissionError("Couldn't upload file.")
+        (error) => submissionError("Error in file submission.")
       )
       .catch((error) => submissionError("Unknown error occurred."));
   };
+
+  const Header = () => (
+    <div className="app-header">
+      <h1>Add from Excel</h1>
+      <XIcon className="h-6 w-6" />
+    </div>
+  );
 
   const SuccessScreen = () => (
     <div className="success-wrapper">
@@ -87,19 +94,24 @@ function App() {
   );
 
   return (
-    <div className="app-wrapper">
-      <h1 className="font-medium mb-10">Add Candidates to Database</h1>
-      <input
-        type="file"
-        id="upload"
-        name="upload"
-        onChange={handleUpload}
-        disabled={submitted}
-        hidden
-      />
-      <label htmlFor="upload" className="upload-container">
-        {submitted ? <SuccessScreen /> : <UploadSection />}
-      </label>
+    <div className="app-main">
+      <div className="app-wrapper">
+        <Header />
+        <div className="app-content">
+          <h1 className="font-medium mb-10">Add Candidates to Database</h1>
+          <input
+            type="file"
+            id="upload"
+            name="upload"
+            onChange={handleUpload}
+            disabled={submitted}
+            hidden
+          />
+          <label htmlFor="upload" className="upload-container">
+            {submitted ? <SuccessScreen /> : <UploadSection />}
+          </label>
+        </div>
+      </div>
     </div>
   );
 }

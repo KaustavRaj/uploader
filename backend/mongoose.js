@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
+const config = require("./config");
 
-const connectionURL = "mongodb://localhost:27017/uploader";
+const {
+  db: { host, port, name },
+} = config;
+const connectionURL = `mongodb://${host}:${port}/${name}`;
 
 mongoose.connect(connectionURL, {
   useNewUrlParser: true,

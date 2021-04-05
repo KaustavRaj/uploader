@@ -4,7 +4,7 @@ module.exports = function (mongoose) {
   const candidateSchema = new mongoose.Schema({
     "Name of the Candidate": { type: String, required: true },
     Email: { type: String, unique: true, required: true },
-    "Mobile No.": { type: String },
+    "Mobile No": { type: String },
     "Date of Birth": { type: String },
     "Work Experience": { type: String },
     "Resume Title": { type: String },
